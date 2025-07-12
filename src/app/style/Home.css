@@ -1,0 +1,20 @@
+@import "tailwindcss";
+.container {
+  @apply flex flex-col p-5 gap-5;
+}
+
+.container div {
+  @apply flex flex-col gap-1;
+}
+
+.section {
+  @apply h-screen flex justify-center items-center flex flex-col gap-5 px-10;
+}
+
+.content {
+  @apply bg-slate-500 p-5 rounded-[20px] md:w-[40rem] md:h-[20rem] flex flex-col justify-center items-center;
+}
+
+.groupButtons {
+  @apply flex gap-3 flex-row flex-wrap;
+}
