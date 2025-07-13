@@ -53,7 +53,7 @@ export default function Page() {
     const localStorageGet = JSON.parse(localStorage.getItem("flashCards") || "[]");
 
     setFlashCard(localStorageGet[Number(idFlashCard)]);
-  }, []);
+  }, [idFlashCard]);
 
   const changeCard = (params: "prev" | "next") => {
     setIsShowBack(false);

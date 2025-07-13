@@ -2,8 +2,9 @@
 
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { FlashCards } from "../types/Home";
 
-export const saveDB = async (flashCards: any) => {
+export const saveDB = async (flashCards: FlashCards) => {
   if (!flashCards) {
     console.error("Nenhum dado encontrado.");
     return;

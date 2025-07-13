@@ -7,6 +7,7 @@ import { FlashCardsInformation, Props } from "../types/Home";
 import UseAutocomplete from "./inputAutoComplete";
 import { formatarString } from "../Hook/formtString";
 import { saveDB } from "../Hook/salveDB";
+import { FlashCards } from "../types/Home";
 export default function Modal(props: Props) {
   const { flashCards, setFlashCards } = props;
   const [isOpenModal, setIsOpenModal] = React.useState(false);
@@ -36,7 +37,7 @@ export default function Modal(props: Props) {
 
     const updated = [...flashCards, newFlashCard];
     setFlashCards(updated);
-    saveDB(updated); // usa os dados atualizados aqui
+    saveDB(updated as unknown as FlashCards); // usa os dados atualizados aqui
     return;
   }
 
@@ -59,7 +60,7 @@ export default function Modal(props: Props) {
   });
 
   setFlashCards(updated);
-  saveDB(updated); // usa os dados atualizados aqui
+  saveDB(updated  as unknown as FlashCards);
 };
 
   const criarFlashCard = () => {
