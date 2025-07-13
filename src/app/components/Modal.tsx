@@ -2,14 +2,14 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
 import Button from "@mui/material/Button";
 import React from "react";
-import "../style/Home.css";
+import "../style/dashboard.css";
 import { FlashCardsInformation, Props } from "../types/Home";
 import UseAutocomplete from "./inputAutoComplete";
 import { formatarString } from "../Hook/formtString";
-
+import { saveDB } from "../Hook/salveDB";
 export default function Modal(props: Props) {
   const { flashCards, setFlashCards } = props;
-  const [isOpenModal, setIsOpenModal] = React.useState(true);
+  const [isOpenModal, setIsOpenModal] = React.useState(false);
   //prettier-ignore
   const [flashCardsInformation, setFlashCardsInformation] = React.useState<FlashCardsInformation>({
       flashCardName: "",
@@ -17,49 +17,50 @@ export default function Modal(props: Props) {
       back: "",
     });
 
-  React.useEffect(() => {
-    if (flashCards.length) saveLocalStorage();
-  }, [flashCards]);
+  //prettier-ignore
+  // React.useEffect(() =>  console.log('Atualização de flashCards'), [flashCards]);
 
   const updateFlashCards = (params: boolean) => {
-    if (params) {
-      setFlashCards([
-        ...flashCards,
+  if (params) {
+    const newFlashCard = {
+      flashCardName: flashCardsInformation.flashCardName,
+      flashCards: [
         {
-          flashCardName: flashCardsInformation.flashCardName,
-          flashCards: [
-            {
-              front: flashCardsInformation.front,
-              back: flashCardsInformation.back,
-              id: 0,
-            },
-          ],
-          id: flashCards.length,
+          front: flashCardsInformation.front,
+          back: flashCardsInformation.back,
+          id: 0,
         },
-      ]);
+      ],
+      id: flashCards.length,
+    };
 
-      return;
+    const updated = [...flashCards, newFlashCard];
+    setFlashCards(updated);
+    saveDB(updated); // usa os dados atualizados aqui
+    return;
+  }
+
+  const updated = flashCards.map((item) => {
+     //prettier-ignore
+    if (formatarString(item.flashCardName) === formatarString(flashCardsInformation.flashCardName)) {
+      return {
+        ...item,
+        flashCards: [
+          ...item.flashCards,
+          {
+            front: flashCardsInformation.front,
+            back: flashCardsInformation.back,
+            id: item.flashCards.length,
+          },
+        ],
+      };
     }
-    setFlashCards(
-      flashCards.map((item) => {
-        //prettier-ignore
-        if (formatarString(item.flashCardName) === formatarString(flashCardsInformation.flashCardName)) {
-          return {
-            ...item,
-            flashCards: [
-              ...item.flashCards,
-              {
-                front: flashCardsInformation.front,
-                back: flashCardsInformation.back,
-                id: item.flashCards.length,
-              },
-            ],
-          };
-        }
-        return item;
-      })
-    );
-  };
+    return item;
+  });
+
+  setFlashCards(updated);
+  saveDB(updated); // usa os dados atualizados aqui
+};
 
   const criarFlashCard = () => {
     if (
@@ -81,7 +82,7 @@ export default function Modal(props: Props) {
   };
 
   //prettier-ignore
-  const saveLocalStorage = () => localStorage.setItem("flashCards", JSON.stringify([...flashCards]));
+  //! const saveLocalStorage = () => localStorage.setItem("flashCards", JSON.stringify([...flashCards]));
 
   return (
     <>
