@@ -9,6 +9,8 @@ import MenuItem from "@mui/material/MenuItem";
 import BtnRedirect from "../../../components/btnRedirect";
 import { useParams } from "next/navigation";
 import { formatarString } from "../../../Hook/formtString";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../../firebase";
 
 export default function Page() {
   const params = useParams();
@@ -29,8 +31,6 @@ export default function Page() {
   //prettier-ignore
   const lastCard = flashCard?.flashCards?.length ? flashCard.flashCards.length - 1 : 0;
 
-  console.log(flashCard?.flashCards[flashcardPosition]);
-
   document.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendAnswer();
   });
@@ -44,15 +44,21 @@ export default function Page() {
       setUserAnswerStatus("wrong");
       setIsShowBack(true);
     }
-
-    console.log(refTitleInput.current);
   };
 
   React.useEffect(() => {
-    //prettier-ignore
-    const localStorageGet = JSON.parse(localStorage.getItem("flashCards") || "[]");
+    const getFlashCardsDB = async () => {
+      const querySnapshot = await getDocs(collection(db, "flashCards"));
 
-    setFlashCard(localStorageGet[Number(idFlashCard)]);
+      querySnapshot.forEach((doc) => {
+        //prettier-ignore
+        setFlashCard(doc.data().cards.filter((item: FlashCards) => item.id === Number(idFlashCard))[0]);
+      });
+    };
+
+    getFlashCardsDB();
+
+    // setFlashCard(localStorageGet[Number(idFlashCard)]);
   }, [idFlashCard]);
 
   const changeCard = (params: "prev" | "next") => {

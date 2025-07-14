@@ -16,6 +16,10 @@ export const saveDB = async (flashCards: FlashCards) => {
 
     await setDoc(docRef, { cards: flashCards });
 
+    //   const docRef = await addDoc(collection(db, "flashCards"), {
+    //   cards: flashCards,
+    // });
+
     console.log("Documento sobrescrito com sucesso!");
   } catch (error) {
     console.error("Erro ao salvar no Firestore:", error);
