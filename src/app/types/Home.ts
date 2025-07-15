@@ -10,6 +10,12 @@ export type FlashCards = {
   id: number;
 };
 
+export type FlashCardsArray = {
+  flashCardName: string;
+  flashCards: FlashCard;
+  id: number;
+}[];
+
 export type FlashCard = {
   front: string;
   back: string;

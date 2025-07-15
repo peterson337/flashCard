@@ -1,21 +1,23 @@
 "use client";
 import React, { Fragment } from "react";
 import "../../../style/flashCard.css";
-import { FlashCards } from "../../../types/Home";
 import Button from "@mui/material/Button";
-import { AiFillSound } from "react-icons/ai";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import BtnRedirect from "../../../components/btnRedirect";
 import { useParams } from "next/navigation";
-import { formatarString } from "../../../Hook/formtString";
-import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../../firebase";
+import { formatarString } from "../../../Hook/formtString";
+import { FlashCards } from "../../../types/Home";
+import BtnRedirect from "../../../components/btnRedirect";
+import ExternalSearchDropdown from "../../../components/ExternalSearchDropdown";
+import { collection, getDocs } from "firebase/firestore";
+import { redirect } from "next/navigation";
+import { saveDB } from "../../../Hook/salveDB";
 
 export default function Page() {
   const params = useParams();
   const [flashCard, setFlashCard] = React.useState<FlashCards | null>(null);
+  const [flashCards, setFlashCards] = React.useState([]);
   const [isShowBack, setIsShowBack] = React.useState<boolean>(false);
+
   //prettier-ignore
   const [userAnswerStatus, setUserAnswerStatus] = React.useState<"correct" | "wrong" | "">("");
   //prettier-ignore
@@ -25,8 +27,6 @@ export default function Page() {
   const refTitleInput = React.useRef("");
 
   const idFlashCard = params.id;
-
-  const wordToTranslate = flashCard?.flashCards[flashcardPosition].back;
 
   //prettier-ignore
   const lastCard = flashCard?.flashCards?.length ? flashCard.flashCards.length - 1 : 0;
@@ -46,39 +46,51 @@ export default function Page() {
     }
   };
 
+  const flashCardsSelected = (params: FlashCards[]) => {
+    //prettier-ignore
+    return params.filter((item: FlashCards) => item.id === Number(idFlashCard))[0];
+  };
+
+  const getFlashCardsDB = React.useCallback(async () => {
+    const querySnapshot = await getDocs(collection(db, "flashCards"));
+
+    querySnapshot.forEach((doc) => {
+      setFlashCards(doc.data().cards || []);
+      //prettier-ignore
+      setFlashCard(flashCardsSelected(doc.data().cards) || []);
+    });
+  }, []);
+
   React.useEffect(() => {
-    const getFlashCardsDB = async () => {
-      const querySnapshot = await getDocs(collection(db, "flashCards"));
-
-      querySnapshot.forEach((doc) => {
-        //prettier-ignore
-        setFlashCard(doc.data().cards.filter((item: FlashCards) => item.id === Number(idFlashCard))[0]);
-      });
-    };
-
     getFlashCardsDB();
-
-    // setFlashCard(localStorageGet[Number(idFlashCard)]);
-  }, [idFlashCard]);
+  }, [idFlashCard, getFlashCardsDB]);
 
   const changeCard = (params: "prev" | "next") => {
     setIsShowBack(false);
     setUserAnswerStatus("");
     refTitleInput.current = "";
-    setFlashcardPosition(
-      params === "prev" ? flashcardPosition - 1 : flashcardPosition + 1
-    );
+    //prettier-ignore
+    setFlashcardPosition(params === "prev" ? flashcardPosition - 1 : flashcardPosition + 1);
   };
 
-  //   console.log(flashCard?.flashCards.length);
+  const deleteFlashCard = (id: number) => {
+    //prettier-ignore
+    const isDeleteFlashCard = confirm("Deseja excluir este flash card? Esta ação não pode ser desfeita.")
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<SVGElement>) =>
-    setAnchorEl(event.currentTarget as unknown as HTMLElement);
+    if (isDeleteFlashCard) {
+      //prettier-ignore
+      flashCards.filter((item: FlashCards) => { if (item.id === Number(idFlashCard)) item.flashCards.splice(id, 1)} );
 
-  const handleClose = () => setAnchorEl(null);
+      saveDB(flashCards as unknown as FlashCards);
 
+      getFlashCardsDB();
+
+      //prettier-ignore
+      const quantidadeAtualDeFlashCards = flashCardsSelected(flashCards)
+
+      if (quantidadeAtualDeFlashCards.flashCards.length === 0) redirect("/");
+    }
+  };
   return (
     <section className="section">
       <div className="content">
@@ -108,43 +120,9 @@ export default function Page() {
                     : `Resposta errada! A resposta correta é: ${flashCard.flashCards[flashcardPosition].back}`}
                 </p>
 
-                <AiFillSound
-                  className="text-2xl cursor-pointer"
-                  id="demo-positioned-button"
-                  aria-controls={open ? "demo-positioned-menu" : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? "true" : undefined}
-                  onClick={handleClick}
+                <ExternalSearchDropdown
+                  wordToTranslate={flashCard.flashCards[flashcardPosition].back}
                 />
-
-                <Menu
-                  id="demo-positioned-menu"
-                  aria-labelledby="demo-positioned-button"
-                  anchorEl={anchorEl}
-                  open={open}
-                  onClose={handleClose}
-                  anchorOrigin={{
-                    vertical: "top",
-                    horizontal: "left",
-                  }}
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "left",
-                  }}
-                >
-                  <a
-                    href={`https://translate.google.com/?sl=en&tl=pt&text=${wordToTranslate}&op=translate`}
-                    target="_blank"
-                  >
-                    <MenuItem onClick={handleClose}>Google tradutor</MenuItem>
-                  </a>
-                  <a
-                    href={`https://www.google.com/search?q=how+how+to+pronounce+${wordToTranslate}&oq=how&gs_lcrp=EgZjaHJvbWUqCAgAEEUYJxg7MggIABBFGCcYOzIHCAEQLhiABDIGCAIQRRg9MgYIAxBFGD0yBggEEEUYPTIGCAUQRRhBMgYIBhBFGEEyBggHEEUYQdIBCDEwMDdqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8`}
-                    target="_blank"
-                  >
-                    <MenuItem onClick={handleClose}>How to pronounce</MenuItem>
-                  </a>
-                </Menu>
               </div>
             )}
             {
@@ -154,7 +132,12 @@ export default function Page() {
                   <Fragment key={index}>
                     {index === flashcardPosition && (
                       <div className="stylePadrao">
-                        <p className="text-center text-2xl">{item.front}</p>
+
+                        <span className="spanWordButton">
+                          <p className="text-center text-2xl">{item.front}</p>
+                          <ExternalSearchDropdown wordToTranslate={item.front}/>
+                          </span>
+
                         <input
                           type="text"
                           placeholder="Digite sua resposta"
@@ -163,9 +146,17 @@ export default function Page() {
                           //prettier-ignore
                           onChange={(e) =>(refTitleInput.current = e.target.value)}
                         />
+                        <div>
                         <Button variant="contained" onClick={sendAnswer} disabled={isShowBack}>
                           Enviar resposta
                         </Button>
+                         
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+
+                        <Button variant="contained" color="error" onClick={() => deleteFlashCard(index)}>
+                          Excluir flash card
+                        </Button>
+                        </div>
                       </div>
                     )}
                   </Fragment>

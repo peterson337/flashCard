@@ -8,6 +8,7 @@ import UseAutocomplete from "./inputAutoComplete";
 import { formatarString } from "../Hook/formtString";
 import { saveDB } from "../Hook/salveDB";
 import { FlashCards } from "../types/Home";
+import Toast from "../components/Toast";
 export default function Modal(props: Props) {
   const { flashCards, setFlashCards } = props;
   const [isOpenModal, setIsOpenModal] = React.useState(false);
@@ -17,33 +18,46 @@ export default function Modal(props: Props) {
       front: "",
       back: "",
     });
+  const [isShowToast, setIsShowToast] = React.useState({
+    open: false,
+    vertical: "top",
+    horizontal: "right",
+    text: "",
+    type: "",
+  });
 
   //prettier-ignore
   // React.useEffect(() =>  console.log('Atualização de flashCards'), [flashCards]);
 
-  const updateFlashCards = (params: boolean) => {
-  if (params) {
-    const newFlashCard = {
-      flashCardName: flashCardsInformation.flashCardName,
-      flashCards: [
-        {
-          front: flashCardsInformation.front,
-          back: flashCardsInformation.back,
-          id: 0,
-        },
-      ],
-      id: flashCards.length,
-    };
-
-    const updated = [...flashCards, newFlashCard];
-    setFlashCards(updated);
-    saveDB(updated as unknown as FlashCards); // usa os dados atualizados aqui
-    return;
+  const functionPadrao = (updated: FlashCards[]) => {
+  setIsShowToast({ ...isShowToast, open: true, text: "Flash card criado com sucesso!", type: "success" });
+  setFlashCardsInformation({ ...flashCardsInformation, front: "", back: "" });
+  setFlashCards(updated);
+  saveDB(updated  as unknown as FlashCards);
   }
 
-  const updated = flashCards.map((item) => {
-     //prettier-ignore
-    if (formatarString(item.flashCardName) === formatarString(flashCardsInformation.flashCardName)) {
+  const updateFlashCards = (params: boolean) => {
+    if (params) {
+      const newFlashCard = {
+        flashCardName: flashCardsInformation.flashCardName,
+        flashCards: [
+          {
+            front: flashCardsInformation.front,
+            back: flashCardsInformation.back,
+            id: 0,
+          },
+        ],
+        id: new Date().getTime(),
+      };
+
+      const updated = [...flashCards, newFlashCard];
+      functionPadrao(updated);
+      return;
+    }
+
+    const updated = flashCards.map((item) => {
+      //prettier-ignore
+      if (formatarString(item.flashCardName) === formatarString(flashCardsInformation.flashCardName)) {
       return {
         ...item,
         flashCards: [
@@ -56,12 +70,11 @@ export default function Modal(props: Props) {
         ],
       };
     }
-    return item;
-  });
+      return item;
+    });
 
-  setFlashCards(updated);
-  saveDB(updated  as unknown as FlashCards);
-};
+    functionPadrao(updated);
+  };
 
   const criarFlashCard = () => {
     if (
@@ -88,6 +101,7 @@ export default function Modal(props: Props) {
   return (
     <>
       <Dialog onClose={() => setIsOpenModal(false)} open={isOpenModal}>
+        <Toast isShowToast={isShowToast} setIsShowToast={setIsShowToast}/>
         <div className="container">
           <DialogTitle sx={{ textAlign: "center" }}>
             Criar flash card
