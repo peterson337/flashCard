@@ -13,9 +13,12 @@ import { FlashCards } from "../../types/Home";
 import BtnRedirect from "../../components/btnRedirect";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
-
+import { saveDB } from "../../Hook/salveDB";
 export default function Dashboard() {
   const [flashCards, setFlashCards] = React.useState<FlashCards[]>([]);
+  const [isReRender, setIsReRender] = React.useState<boolean>(false);
+  const [editMode, setEditMode] = React.useState<null | number>(null);
+  const [TextInput, setTextInput] = React.useState("");
 
   //prettier-ignore
   React.useEffect(() => {
@@ -25,7 +28,30 @@ export default function Dashboard() {
   };
 
   getFlashCardsDB();
-  }, []);
+  }, [isReRender]);
+
+  const deleteListFlashCards = (id: number) => {
+    //prettier-ignore
+    const isDeleteFlashCard = confirm("Deseja excluir este flash card? Esta ação não pode ser desfeita")
+    if (isDeleteFlashCard) {
+      //prettier-ignore
+      const NewListFlashCards = flashCards.filter((item: FlashCards) => item.id !== id);
+      saveDB(NewListFlashCards as unknown as FlashCards);
+      setIsReRender(!isReRender);
+    }
+  };
+
+  const updateListFlashCards = (id: number) => {
+    const NewListFlashCards = flashCards.filter((item: FlashCards) => {
+      if (item.id === id) {
+        return (item.flashCardName = TextInput);
+      }
+      return item;
+    });
+
+    saveDB(NewListFlashCards as unknown as FlashCards);
+    setIsReRender(!isReRender);
+  };
 
   return (
     <section className="section">
@@ -49,7 +75,19 @@ export default function Dashboard() {
                       sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                     >
                       <TableCell component="th" scope="row">
-                        {item.flashCardName}
+                        {editMode !== item.id ? (
+                          <>{item.flashCardName}</>
+                        ) : (
+                          <input
+                            type="text"
+                            value={TextInput}
+                            onChange={(e) => setTextInput(e.target.value)}
+                            autoFocus={true}
+                            onKeyDown={(e) =>
+                              e.key === "Enter" && updateListFlashCards(item.id)
+                            }
+                          />
+                        )}
                       </TableCell>
                       <TableCell align="right">
                         <div className="groupButtons">
@@ -59,8 +97,33 @@ export default function Dashboard() {
                             btnText="Acessar"
                           />
 
-                          <Button variant="contained" color="success">
-                            Editar
+                          <Button
+                            variant="contained"
+                            color="success"
+                            onClick={() => {
+                              editMode === item.id;
+                              if (editMode === item.id) {
+                                updateListFlashCards(item.id);
+                                setEditMode(null);
+                              } else {
+                                setEditMode(item.id);
+                                setTextInput(item.flashCardName);
+                              }
+                            }}
+                          >
+                            {editMode === item.id ? "Salvar" : "Editar"}
+                          </Button>
+
+                          <Button
+                            variant="contained"
+                            color="error"
+                            onClick={() =>
+                              editMode === item.id
+                                ? setEditMode(null)
+                                : deleteListFlashCards(item.id)
+                            }
+                          >
+                            {editMode === item.id ? "Cancelar" : "Deletar"}
                           </Button>
                         </div>
                       </TableCell>

@@ -17,6 +17,11 @@ export default function Page() {
   const [flashCard, setFlashCard] = React.useState<FlashCards | null>(null);
   const [flashCards, setFlashCards] = React.useState([]);
   const [isShowBack, setIsShowBack] = React.useState<boolean>(false);
+  const [editMode, setEditMode] = React.useState({
+    idFlashCard: null as null | number,
+    front: "",
+    back: "",
+  });
 
   //prettier-ignore
   const [userAnswerStatus, setUserAnswerStatus] = React.useState<"correct" | "wrong" | "">("");
@@ -24,7 +29,7 @@ export default function Page() {
 
   const [flashcardPosition, setFlashcardPosition] = React.useState(0);
 
-  const refTitleInput = React.useRef("");
+  const [responseUser, setResponseUser] = React.useState("");
 
   const idFlashCard = params.id;
 
@@ -37,7 +42,7 @@ export default function Page() {
 
   const sendAnswer = () => {
     //prettier-ignore
-    if (formatarString(refTitleInput.current) === formatarString(flashCard?.flashCards[flashcardPosition].back || "")) {
+    if (formatarString(responseUser) === formatarString(flashCard?.flashCards[flashcardPosition].back || "")) {
       setUserAnswerStatus("correct");
       setIsShowBack(true);
     } else {
@@ -68,7 +73,7 @@ export default function Page() {
   const changeCard = (params: "prev" | "next") => {
     setIsShowBack(false);
     setUserAnswerStatus("");
-    refTitleInput.current = "";
+    setResponseUser("");
     //prettier-ignore
     setFlashcardPosition(params === "prev" ? flashcardPosition - 1 : flashcardPosition + 1);
   };
@@ -91,11 +96,30 @@ export default function Page() {
       if (quantidadeAtualDeFlashCards.flashCards.length === 0) redirect("/");
     }
   };
+
+  const saveFlashCard = () => {
+    flashCards.map((item: FlashCards) => {
+      if (item.id === Number(idFlashCard)) {
+        item.flashCards[editMode.idFlashCard as number].front = editMode.front;
+        item.flashCards[editMode.idFlashCard as number].back = editMode.back;
+      }
+
+      return item;
+    });
+
+    saveDB(flashCards as unknown as FlashCards);
+    getFlashCardsDB();
+    setEditMode({
+      idFlashCard: null,
+      front: "",
+      back: "",
+    });
+  };
   return (
     <section className="section">
       <div className="content">
         <BtnRedirect
-          color="error"
+          color="secondary"
           router={"/"}
           btnText="Voltar para a página inicial"
         />
@@ -117,7 +141,7 @@ export default function Page() {
                 >
                   {userAnswerStatus === "correct"
                     ? "Resposta correta!"
-                    : `Resposta errada! A resposta correta é: ${flashCard.flashCards[flashcardPosition].back}`}
+                    : `A resposta correta é: ${flashCard.flashCards[flashcardPosition].back}`}
                 </p>
 
                 <ExternalSearchDropdown
@@ -131,8 +155,11 @@ export default function Page() {
                 return (
                   <Fragment key={index}>
                     {index === flashcardPosition && (
+                      <>
                       <div className="stylePadrao">
 
+                      {editMode.idFlashCard === null ?(
+                        <>
                         <span className="spanWordButton">
                           <p className="text-center text-2xl">{item.front}</p>
                           <ExternalSearchDropdown wordToTranslate={item.front}/>
@@ -144,20 +171,57 @@ export default function Page() {
                           autoFocus
                           disabled={isShowBack}
                           //prettier-ignore
-                          onChange={(e) =>(refTitleInput.current = e.target.value)}
+                          onChange={(e) => setResponseUser( e.target.value)}
+                          value={responseUser}
                         />
-                        <div>
+                        <div className="groupButton">
                         <Button variant="contained" onClick={sendAnswer} disabled={isShowBack}>
                           Enviar resposta
                         </Button>
                          
-                        &nbsp;&nbsp;&nbsp;&nbsp;
-
                         <Button variant="contained" color="error" onClick={() => deleteFlashCard(index)}>
                           Excluir flash card
                         </Button>
+                        
+                        <Button 
+                        variant="contained" 
+                        color="success" 
+                        onClick={() => setEditMode({ idFlashCard: index, front: item.front, back: item.back})}
+                        >
+                          Editar flash card
+                        </Button>
                         </div>
-                      </div>
+                        </>
+                        
+                      ) : (
+                        <>
+                        <label>Frente</label>
+                        <input 
+                        type="text" 
+                        value={editMode.front} 
+                        onChange={(e) => setEditMode({ ...editMode, front: e.target.value })} 
+                        />
+                        <label>Verso</label>
+                        <input type="text" 
+                        value={editMode.back}  
+                        onChange={(e) => setEditMode({ ...editMode, back: e.target.value })}
+                        />
+                        <Button variant="contained" onClick={saveFlashCard}>Salvar</Button>
+
+                        <Button 
+                        variant="contained"
+                         onClick={() => setEditMode({
+                          idFlashCard: null,
+                          front: "",
+                          back: ""
+                        })} 
+                        color="error">Cancelar</Button>
+                        </>
+                      )
+                      }
+                      </div>  
+                      
+                      </>
                     )}
                   </Fragment>
                 );

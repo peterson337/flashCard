@@ -98,10 +98,15 @@ export default function Modal(props: Props) {
   //prettier-ignore
   //! const saveLocalStorage = () => localStorage.setItem("flashCards", JSON.stringify([...flashCards]));
 
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") setIsOpenModal(false);
+    if (e.key === "Enter") criarFlashCard();
+  });
+
   return (
     <>
       <Dialog onClose={() => setIsOpenModal(false)} open={isOpenModal}>
-        <Toast isShowToast={isShowToast} setIsShowToast={setIsShowToast}/>
+        <Toast isShowToast={isShowToast} setIsShowToast={setIsShowToast} />
         <div className="container">
           <DialogTitle sx={{ textAlign: "center" }}>
             Criar flash card

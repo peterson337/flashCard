@@ -5,7 +5,7 @@
 }
 
 .content {
-  @apply bg-slate-500 p-5 rounded-[20px] md:w-[40rem] md:h-[20rem] flex flex-col justify-center items-center;
+  @apply bg-slate-500 p-5 rounded-[20px] md:w-[40rem] flex flex-col justify-center items-center;
 }
 
 .stylePadrao {
@@ -21,7 +21,7 @@ h2 {
 }
 
 .groupButton {
-  @apply flex gap-3 flex-row flex-wrap mt-3;
+  @apply flex gap-3 flex-row flex-wrap mt-3 justify-center items-center;
 }
 
 .spanWordButton {
