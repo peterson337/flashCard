@@ -64,7 +64,7 @@ export default function Page() {
       //prettier-ignore
       setFlashCard(flashCardsSelected(doc.data().cards) || []);
     });
-  }, []);
+  }, [flashCardsSelected]);
 
   React.useEffect(() => {
     getFlashCardsDB();

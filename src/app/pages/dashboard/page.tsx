@@ -101,7 +101,6 @@ export default function Dashboard() {
                             variant="contained"
                             color="success"
                             onClick={() => {
-                              editMode === item.id;
                               if (editMode === item.id) {
                                 updateListFlashCards(item.id);
                                 setEditMode(null);
