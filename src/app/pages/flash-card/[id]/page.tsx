@@ -31,6 +31,8 @@ export default function Page() {
 
   const [responseUser, setResponseUser] = React.useState("");
 
+  const flashCardName = React.useRef("");
+
   const idFlashCard = params.id;
 
   //prettier-ignore
@@ -63,12 +65,13 @@ export default function Page() {
       setFlashCards(doc.data().cards || []);
       //prettier-ignore
       setFlashCard(flashCardsSelected(doc.data().cards) || []);
+      //prettier-ignore
+      flashCardName.current = flashCardsSelected(doc.data().cards).flashCardName;
     });
-  }, [flashCardsSelected]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  React.useEffect(() => {
-    getFlashCardsDB();
-  }, [idFlashCard, getFlashCardsDB]);
+  React.useEffect(() => void getFlashCardsDB(), [idFlashCard]);
 
   const changeCard = (params: "prev" | "next") => {
     setIsShowBack(false);
@@ -118,6 +121,8 @@ export default function Page() {
   return (
     <section className="section">
       <div className="content">
+        <h2 className="w-full">{flashCardName.current}</h2>
+        <br />
         <BtnRedirect
           color="secondary"
           router={"/"}
@@ -128,7 +133,6 @@ export default function Page() {
 
         {flashCard && (
           <>
-            {/* <h2>{flashCard.flashCardName}</h2> */}
             {/*  //prettier-ignore */}
             {isShowBack && (
               <div className="flex flex-row items-center gap-3">

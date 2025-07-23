@@ -14,17 +14,22 @@ import BtnRedirect from "../../components/btnRedirect";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 import { saveDB } from "../../Hook/salveDB";
+import Stack from "@mui/material/Stack";
+import LoadingCircular from "../../components/LoadingCircular";
+
 export default function Dashboard() {
   const [flashCards, setFlashCards] = React.useState<FlashCards[]>([]);
   const [isReRender, setIsReRender] = React.useState<boolean>(false);
   const [editMode, setEditMode] = React.useState<null | number>(null);
   const [TextInput, setTextInput] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(true);
 
   //prettier-ignore
   React.useEffect(() => {
   const getFlashCardsDB = async () => {
     const querySnapshot = await getDocs(collection(db, "flashCards"));
     querySnapshot.forEach((doc) => setFlashCards(doc.data().cards || []));
+    setIsLoading(false);
   };
 
   getFlashCardsDB();
@@ -56,7 +61,12 @@ export default function Dashboard() {
   return (
     <section className="section">
       <div className="content">
-        {flashCards.length === 0 ? (
+        {isLoading ? (
+          <Stack spacing={2} direction="row" alignItems="center">
+            <p className="text-2xl">Carregando as listas de flash cards:</p>
+            <LoadingCircular />
+          </Stack>
+        ) : flashCards.length === 0 ? (
           <p>Nenhum flash card encontrado!</p>
         ) : (
           <TableContainer component={Paper}>
