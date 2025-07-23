@@ -63,7 +63,7 @@ export default function Dashboard() {
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  <TableCell>Nome dos flash cards</TableCell>
+                  <TableCell>Nome das listas de flash cards</TableCell>
                   <TableCell></TableCell>
                 </TableRow>
               </TableHead>
