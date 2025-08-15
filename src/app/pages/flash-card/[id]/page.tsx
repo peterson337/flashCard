@@ -1,5 +1,5 @@
 "use client";
-import React, { Fragment } from "react";
+import React, { Fragment, useRef } from "react";
 import "../../../style/flashCard.css";
 import Button from "@mui/material/Button";
 import { useParams } from "next/navigation";
@@ -39,7 +39,13 @@ export default function Page() {
   const lastCard = flashCard?.flashCards?.length ? flashCard.flashCards.length - 1 : 0;
 
   document.addEventListener("keydown", (e) => {
+    //prettier-ignore
+    if (e.key === "Escape" && flashcardPosition !== 0) changeCard("prev");
+
     if (e.key === "Enter") sendAnswer();
+
+    if (e.key === "Enter" && e.ctrlKey && flashcardPosition !== lastCard)
+      changeCard("next");
   });
 
   const sendAnswer = () => {

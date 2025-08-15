@@ -61,6 +61,7 @@ export default function Dashboard() {
   return (
     <section className="section">
       <div className="content">
+        <h2 className="title">Lista de flash cards</h2>
         {isLoading ? (
           <Stack spacing={2} direction="row" alignItems="center">
             <p className="text-2xl">Carregando as listas de flash cards:</p>
@@ -69,7 +70,7 @@ export default function Dashboard() {
         ) : flashCards.length === 0 ? (
           <p>Nenhum flash card encontrado!</p>
         ) : (
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ maxHeight: 650 }}>
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>

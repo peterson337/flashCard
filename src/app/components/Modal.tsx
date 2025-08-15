@@ -1,3 +1,4 @@
+"use client";
 import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
 import Button from "@mui/material/Button";
@@ -34,6 +35,9 @@ export default function Modal(props: Props) {
   setFlashCardsInformation({ ...flashCardsInformation, front: "", back: "" });
   setFlashCards(updated);
   saveDB(updated  as unknown as FlashCards);
+  setTimeout(() => {
+     setIsShowToast({ ...isShowToast, open: false, text: "", type: "" }); 
+  }, 2000);
   }
 
   const updateFlashCards = (params: boolean) => {
@@ -77,12 +81,14 @@ export default function Modal(props: Props) {
   };
 
   const criarFlashCard = () => {
+    console.log("Criar flash card");
     if (
       flashCardsInformation.flashCardName === "" ||
       flashCardsInformation.front === "" ||
       flashCardsInformation.back === ""
-    )
+    ) {
       return;
+    }
 
     //prettier-ignore
     const validation = flashCards.filter((item) => item.flashCardName === flashCardsInformation.flashCardName)
@@ -97,11 +103,6 @@ export default function Modal(props: Props) {
 
   //prettier-ignore
   //! const saveLocalStorage = () => localStorage.setItem("flashCards", JSON.stringify([...flashCards]));
-
-  // addEventListener("keydown", (e) => {
-  //   if (e.key === "Escape") setIsOpenModal(false);
-  //   if (e.key === "Enter") criarFlashCard();
-  // });
 
   return (
     <>
@@ -157,7 +158,7 @@ export default function Modal(props: Props) {
       </Dialog>
 
       <Button variant="contained" onClick={() => setIsOpenModal(true)}>
-        Abrir modal
+        Criar lista de flash cards
       </Button>
     </>
   );
