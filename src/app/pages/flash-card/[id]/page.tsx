@@ -1,5 +1,5 @@
 "use client";
-import React, { Fragment, useRef } from "react";
+import React, { Fragment } from "react";
 import "../../../style/flashCard.css";
 import Button from "@mui/material/Button";
 import { useParams } from "next/navigation";
